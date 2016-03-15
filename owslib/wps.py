@@ -636,21 +636,29 @@ class WPSExecution():
                 self.statusLocation = url
             log.info('\nChecking execution status... (location=%s)' %
                      self.statusLocation)
-            response = reader.readFromUrl(
-                self.statusLocation, username=self.username, password=self.password)
+            try:
+                response = reader.readFromUrl(
+                    self.statusLocation, username=self.username, password=self.password)
+            except:
+                log.error("Could not read status document.")
         else:
             response = reader.readFromString(response)
 
         # store latest response
-        self.response = etree.tostring(response)
-        log.debug(self.response)
+        try:
+            xml = etree.tostring(response)
+        except:
+            log.error("Could not parse XML response.")
+        else:
+            self.response = xml
+            log.debug(self.response)
 
-        self.parseResponse(response)
+            self.parseResponse(response)
 
-        # sleep given number of seconds
-        if self.isComplete() == False:
-            log.info('Sleeping %d seconds...' % sleepSecs)
-            sleep(sleepSecs)
+            # sleep given number of seconds
+            if self.isComplete() == False:
+                log.info('Sleeping %d seconds...' % sleepSecs)
+                sleep(sleepSecs)
 
     def getStatus(self):
         return self.status
