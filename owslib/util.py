@@ -129,24 +129,21 @@ class ResponseWrapper(object):
         return self._response.headers
 
     def read(self):
-        if not self._response.encoding:
-            return self._response.content           # bytes
-
-        return self._response.text.encode('utf-8')  # str
+        return self._response.content
 
     def geturl(self):
         return self._response.url
 
     # @TODO: __getattribute__ for poking at response
 
-def openURL(url_base, data=None, method='Get', cookies=None, username=None, password=None, timeout=30, verify=False):
+def openURL(url_base, data=None, method='Get', cookies=None, username=None, password=None, timeout=30, headers=None, verify=False):
     """
     Function to open URLs.
 
     Uses requests library but with additional checks for OGC service exceptions and url formatting.
     Also handles cookies and simple user password authentication.
     """
-    headers = None
+    headers = headers if headers is not None else {}
     rkwargs = {}
 
     rkwargs['timeout'] = timeout
@@ -165,7 +162,7 @@ def openURL(url_base, data=None, method='Get', cookies=None, username=None, pass
     if method.lower() == 'post':
         try:
             xml = etree.fromstring(data)
-            headers = {'Content-Type': 'text/xml'}
+            headers['Content-Type'] = 'text/xml'
         except (ParseError, UnicodeEncodeError):
             pass
 
@@ -379,10 +376,7 @@ def http_post(url=None, request=None, lang='en-US', timeout=10, username=None, p
         rkwargs['auth'] = (username, password)
 
     up = requests.post(url, request, headers=headers, **rkwargs)
-    if not up.encoding:
-        return up.content           # bytes
-
-    return up.text.encode('utf-8')  # str
+    return up.content
 
 def element_to_string(element, encoding=None, xml_declaration=False):
     """
