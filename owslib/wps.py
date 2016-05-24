@@ -248,7 +248,7 @@ class WebProcessingService(object):
         # build metadata objects
         return self._parseProcessMetadata(rootElement)
 
-    def execute(self, identifier, inputs, output=None, request=None, response=None, lineage=False):
+    def execute(self, identifier, inputs, output=None, async=True, lineage=False, request=None, response=None):
         """
         Submits a WPS process execution request.
         Returns a WPSExecution object, which can be used to monitor the status of the job, and ultimately retrieve the result.
@@ -268,7 +268,12 @@ class WebProcessingService(object):
 
         # build XML request from parameters
         if request is None:
-            requestElement = execution.buildRequest(identifier, inputs, output, lineage=lineage)
+            outputs = []
+            if isinstance(output, str):
+                outputs = [(output, True)]
+            elif isinstance(output, list):
+                outputs = outputs
+            requestElement = execution.buildRequest(identifier, inputs, outputs=outputs, async=async, lineage=lineage)
             request = etree.tostring(requestElement)
             execution.request = request
         log.debug(request)
@@ -510,7 +515,7 @@ class WPSExecution():
         self.dataInputs = []
         self.processOutputs = []
 
-    def buildRequest(self, identifier, inputs=[], output=None, lineage=False):
+    def buildRequest(self, identifier, inputs=[], outputs=[], async=True, lineage=False):
         """
         Method to build a WPS process request.
         identifier: the requested process identifier.
@@ -518,7 +523,10 @@ class WPSExecution():
             - LiteralData inputs are expressed as simple (key,value) tuples where key is the input identifier, value is the value
             - ComplexData inputs are expressed as (key, object) tuples, where key is the input identifier,
               and the object must contain a 'getXml()' method that returns an XML infoset to be included in the WPS request
-        output: array of output identifiers which should be returned.
+        outputs: array of outputs which should be returned:
+                expressed as tuples (key, as_ref) where key is the output identifier and as_ref is True
+                if output should be returned as reference.
+        async: flag if process is run sync or async.
         lineage: if lineage is "true", the Execute operation response shall include the DataInputs and OutputDefinitions elements.
         """
 
@@ -604,16 +612,10 @@ class WPSExecution():
         responseDocumentElement = etree.SubElement(
             responseFormElement, nspath_eval(
                 'wps:ResponseDocument', namespaces),
-            attrib={'storeExecuteResponse': 'true', 'status': 'true', 'lineage': str(lineage).lower()})
-        if isinstance(output, str):
-            self._add_output(
-                responseDocumentElement, output, asReference=True)
-        elif isinstance(output, list):
-            for (identifier, as_reference) in output:
-                self._add_output(
-                    responseDocumentElement, identifier, asReference=as_reference)
-        else:
-            log.warn('output parameter is neither string nor list. output=%s' % output)
+            attrib={'storeExecuteResponse': str(async).lower(), 'status': str(async).lower(), 'lineage': str(lineage).lower()})
+        
+        for identifier, as_reference in outputs:
+            self._add_output(responseDocumentElement, identifier, asReference=as_reference)
         return root
 
     def _add_output(self, element, identifier, asReference=False):
