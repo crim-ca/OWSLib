@@ -268,12 +268,7 @@ class WebProcessingService(object):
 
         # build XML request from parameters
         if request is None:
-            outputs = []
-            if isinstance(output, str):
-                outputs = [(output, True)]
-            elif isinstance(output, list):
-                outputs = outputs
-            requestElement = execution.buildRequest(identifier, inputs, outputs=outputs, async=async, lineage=lineage)
+            requestElement = execution.buildRequest(identifier, inputs, output=output, async=async, lineage=lineage)
             request = etree.tostring(requestElement)
             execution.request = request
         log.debug(request)
@@ -515,7 +510,7 @@ class WPSExecution():
         self.dataInputs = []
         self.processOutputs = []
 
-    def buildRequest(self, identifier, inputs=[], outputs=[], async=True, lineage=False):
+    def buildRequest(self, identifier, inputs=[], output=[], async=True, lineage=False):
         """
         Method to build a WPS process request.
         identifier: the requested process identifier.
@@ -523,7 +518,7 @@ class WPSExecution():
             - LiteralData inputs are expressed as simple (key,value) tuples where key is the input identifier, value is the value
             - ComplexData inputs are expressed as (key, object) tuples, where key is the input identifier,
               and the object must contain a 'getXml()' method that returns an XML infoset to be included in the WPS request
-        outputs: array of outputs which should be returned:
+        output: array of outputs which should be returned:
                 expressed as tuples (key, as_ref) where key is the output identifier and as_ref is True
                 if output should be returned as reference.
         async: flag if process is run sync or async.
@@ -613,6 +608,13 @@ class WPSExecution():
             responseFormElement, nspath_eval(
                 'wps:ResponseDocument', namespaces),
             attrib={'storeExecuteResponse': str(async).lower(), 'status': str(async).lower(), 'lineage': str(lineage).lower()})
+
+        # keeping backward compability of output parameter
+        outputs = []
+        if isinstance(output, str):
+            outputs = [(output, True)]
+        elif isinstance(output, list):
+            outputs = outputs
         
         for identifier, as_reference in outputs:
             self._add_output(responseDocumentElement, identifier, asReference=as_reference)
