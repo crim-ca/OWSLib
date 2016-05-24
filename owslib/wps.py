@@ -248,7 +248,7 @@ class WebProcessingService(object):
         # build metadata objects
         return self._parseProcessMetadata(rootElement)
 
-    def execute(self, identifier, inputs, output=None, request=None, response=None):
+    def execute(self, identifier, inputs, output=None, request=None, response=None, lineage=False):
         """
         Submits a WPS process execution request.
         Returns a WPSExecution object, which can be used to monitor the status of the job, and ultimately retrieve the result.
@@ -268,7 +268,7 @@ class WebProcessingService(object):
 
         # build XML request from parameters
         if request is None:
-            requestElement = execution.buildRequest(identifier, inputs, output)
+            requestElement = execution.buildRequest(identifier, inputs, output, lineage=lineage)
             request = etree.tostring(requestElement)
             execution.request = request
         log.debug(request)
@@ -510,15 +510,16 @@ class WPSExecution():
         self.dataInputs = []
         self.processOutputs = []
 
-    def buildRequest(self, identifier, inputs=[], output=None):
+    def buildRequest(self, identifier, inputs=[], output=None, lineage=False):
         """
         Method to build a WPS process request.
-        identifier: the requested process identifier
-        inputs: array of input arguments for the process.
+        identifier: the requested process identifier.
+        inputs: array of input arguments for the process:
             - LiteralData inputs are expressed as simple (key,value) tuples where key is the input identifier, value is the value
             - ComplexData inputs are expressed as (key, object) tuples, where key is the input identifier,
               and the object must contain a 'getXml()' method that returns an XML infoset to be included in the WPS request
-        output: optional identifier if process output is to be returned as a hyperlink reference
+        output: array of output identifiers which should be returned.
+        lineage: if lineage is "true", the Execute operation response shall include the DataInputs and OutputDefinitions elements.
         """
 
         #<wps:Execute xmlns:wps="http://www.opengis.net/wps/1.0.0"
@@ -592,29 +593,27 @@ class WPSExecution():
                     'input type of "%s" parameter is unknown' % key)
 
         # <wps:ResponseForm>
-        #   <wps:ResponseDocument storeExecuteResponse="true" status="true">
+        #   <wps:ResponseDocument storeExecuteResponse="true" status="true" lineage="false">
         #     <wps:Output asReference="true">
         #       <ows:Identifier>OUTPUT</ows:Identifier>
         #     </wps:Output>
         #   </wps:ResponseDocument>
         # </wps:ResponseForm>
-        if output is not None:
-            responseFormElement = etree.SubElement(
-                root, nspath_eval('wps:ResponseForm', namespaces))
-            responseDocumentElement = etree.SubElement(
-                responseFormElement, nspath_eval(
-                    'wps:ResponseDocument', namespaces),
-                                                       attrib={'storeExecuteResponse': 'true', 'status': 'true'})
-            if isinstance(output, str):
+        responseFormElement = etree.SubElement(
+            root, nspath_eval('wps:ResponseForm', namespaces))
+        responseDocumentElement = etree.SubElement(
+            responseFormElement, nspath_eval(
+                'wps:ResponseDocument', namespaces),
+            attrib={'storeExecuteResponse': 'true', 'status': 'true', 'lineage': str(lineage).lower()})
+        if isinstance(output, str):
+            self._add_output(
+                responseDocumentElement, output, asReference=True)
+        elif isinstance(output, list):
+            for (identifier, as_reference) in output:
                 self._add_output(
-                    responseDocumentElement, output, asReference=True)
-            elif isinstance(output, list):
-                for (identifier, as_reference) in output:
-                    self._add_output(
-                        responseDocumentElement, identifier, asReference=as_reference)
-            else:
-                raise Exception(
-                    'output parameter is neither string nor list. output=%s' % output)
+                    responseDocumentElement, identifier, asReference=as_reference)
+        else:
+            log.warn('output parameter is neither string nor list. output=%s' % output)
         return root
 
     def _add_output(self, element, identifier, asReference=False):
@@ -837,8 +836,9 @@ class WPSExecution():
         #<wps:DataInputs xmlns:wps="http://www.opengis.net/wps/1.0.0"
         # xmlns:ows="http://www.opengis.net/ows/1.1"
         # xmlns:xlink="http://www.w3.org/1999/xlink">
+        self.dataInputs = []
         for inputElement in root.findall(nspath('DataInputs/Input', ns=wpsns)):
-            self.dataInputs.append(Input(inputElement))
+            self.dataInputs.append(Output(inputElement))
             if self.verbose == True:
                 dump(self.dataInputs[-1])
 
