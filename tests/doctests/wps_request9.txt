@@ -24,3 +24,24 @@ Compare to cached XML request
     >>> _request = open(resource_file('wps_EmuExecuteRequest9.xml'), 'rb').read()
     >>> compare_xml(request, _request)
     True
+
+Simulate end of process
+
+    >>> response = open(resource_file('wps_EmuExecuteResponse9.xml'), 'rb').read()
+    >>> execution.checkStatus(sleepSecs=0, response=response)
+    >>> execution.status
+    'ProcessSucceeded'
+    >>> execution.isComplete()
+    True
+
+Display data of process output
+    >>> for output in execution.processOutputs:
+    ...     output.data
+    ... 
+    ['Hello Pingu and welcome to WPS :)']
+
+Display lineage information
+    >>> for inp in execution.dataInputs:
+    ...     inp.identifier, inp.data
+    ('user', ['Pingu'])
+

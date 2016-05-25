@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="en-CA" serviceInstance="http://localhost:8094/wps?service=WPS&amp;request=GetCapabilities&amp;version=1.0.0" statusLocation="http://localhost:8090/wpsoutputs/emu/pywps-73eca8a2-2268-11e6-8cd7-d31c14cd6951.xml">
+    <wps:Process wps:processVersion="1.2">
+        <ows:Identifier>helloworld</ows:Identifier>
+        <ows:Title>Hello World</ows:Title>
+        <ows:Abstract>Welcome user and say hello ...</ows:Abstract>
+        <ows:Metadata xlink:title="Documentation" xlink:href="http://emu.readthedocs.org/en/latest/" />
+    </wps:Process>
+    <wps:Status creationTime="2016-05-25T13:04:30Z">
+        <wps:ProcessSucceeded>PyWPS Process helloworld successfully calculated</wps:ProcessSucceeded>
+    </wps:Status>
+    <wps:DataInputs>
+        <wps:Input>
+            <ows:Identifier>user</ows:Identifier>
+            <ows:Title>Your name</ows:Title>
+            <ows:Abstract>Please enter your name</ows:Abstract>
+            <wps:Data>
+                    <wps:LiteralData>Pingu</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+    </wps:DataInputs>
+    <wps:OutputDefinitions>
+        <wps:Output>
+            <ows:Identifier>output</ows:Identifier>
+            <ows:Title>Welcome message</ows:Title>
+        </wps:Output>
+    </wps:OutputDefinitions>
+    <wps:ProcessOutputs>
+        <wps:Output>
+            <ows:Identifier>output</ows:Identifier>
+            <ows:Title>Welcome message</ows:Title>
+            <wps:Data>
+                <wps:LiteralData dataType="string">Hello Pingu and welcome to WPS :)</wps:LiteralData>
+            </wps:Data>
+        </wps:Output>
+    </wps:ProcessOutputs>
+</wps:ExecuteResponse>
