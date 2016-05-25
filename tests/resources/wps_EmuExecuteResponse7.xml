@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wps:ExecuteResponse xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd" service="WPS" version="1.0.0" xml:lang="en-CA" serviceInstance="http://localhost:8094/wps?service=WPS&amp;request=GetCapabilities&amp;version=1.0.0" statusLocation="http://localhost:8090/wpsoutputs/emu/pywps-09fe45ce-2275-11e6-a4ca-9b612faeec0b.xml">
+    <wps:Process wps:processVersion="0.3">
+        <ows:Identifier>wordcount</ows:Identifier>
+        <ows:Title>Word Counter</ows:Title>
+        <ows:Abstract>Counts words in a given text ...</ows:Abstract>
+    </wps:Process>
+    <wps:Status creationTime="2016-05-25T14:34:36Z">
+        <wps:ProcessSucceeded>PyWPS Process wordcount successfully calculated</wps:ProcessSucceeded>
+    </wps:Status>
+    <wps:DataInputs>
+        <wps:Input>
+            <ows:Identifier>text</ows:Identifier>
+            <ows:Title>Text document</ows:Title>
+            <ows:Abstract>URL of text document</ows:Abstract>
+            <wps:Reference xlink:href="http://emu.readthedocs.io/en/latest/index.html" method="GET" mimeType="text/plain"/>
+        </wps:Input>
+    </wps:DataInputs>
+    <wps:OutputDefinitions>
+        <wps:Output mimeType="text/plain" asReference="true">
+            <ows:Identifier>output</ows:Identifier>
+            <ows:Title>Word count result</ows:Title>
+        </wps:Output>
+    </wps:OutputDefinitions>
+    <wps:ProcessOutputs>
+        <wps:Output>
+            <ows:Identifier>output</ows:Identifier>
+            <ows:Title>Word count result</ows:Title>
+            <wps:Reference href="http://localhost:8090/wpsoutputs/emu/output-09fe45ce-2275-11e6-a4ca-9b612faeec0b.txt" mimeType="text/plain" />
+        </wps:Output>
+    </wps:ProcessOutputs>
+</wps:ExecuteResponse>
+

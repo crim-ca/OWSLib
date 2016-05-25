@@ -17,7 +17,7 @@ Process input/ouutput arguments
 Build XML request for WPS process execution
 
     >>> execution = WPSExecution()
-    >>> requestElement = execution.buildRequest(processid, inputs)
+    >>> requestElement = execution.buildRequest(processid, inputs, lineage=True, async=False)
     >>> request = etree.tostring( requestElement )
 
 Compare to cached XML request
@@ -25,3 +25,24 @@ Compare to cached XML request
     >>> _request = open(resource_file('wps_EmuExecuteRequest7.xml'), 'rb').read()
     >>> compare_xml(request, _request)
     True
+
+Simulate end of process
+
+    >>> response = open(resource_file('wps_EmuExecuteResponse7.xml'), 'rb').read()
+    >>> execution.checkStatus(sleepSecs=0, response=response)
+    >>> execution.status
+    'ProcessSucceeded'
+    >>> execution.isComplete()
+    True
+
+Display data of process output
+    >>> for output in execution.processOutputs:
+    ...     output.reference
+    ... 
+    'http://localhost:8090/wpsoutputs/emu/output-09fe45ce-2275-11e6-a4ca-9b612faeec0b.txt'
+
+Display lineage information
+    >>> for inp in execution.dataInputs:
+    ...     inp.identifier, inp.reference
+    ('text', 'http://emu.readthedocs.io/en/latest/index.html')
+
