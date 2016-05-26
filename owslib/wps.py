@@ -267,17 +267,9 @@ class WebProcessingService(object):
         request: optional pre-built XML request document, prevents building of request from other arguments
         response: optional pre-built XML response document, prevents submission of request to live WPS server
         """
-        method = 'Post'
-        try:
-            base_url = next((m.get('url') for m in self.getOperationByName('Execute').methods if m.get('type').lower() == method.lower()))
-        except StopIteration:
-            base_url = self.url
-        except KeyError:   # happens in doctests with no caps
-            base_url = self.url
-
         # instantiate a WPSExecution object
         log.info('Executing WPS request...')
-        execution = WPSExecution(version=self.version, url=base_url,
+        execution = WPSExecution(version=self.version, url=self.url,
                                  username=self.username, password=self.password, verbose=self.verbose,
                                  verify=self.verify, headers=self.headers)
 
