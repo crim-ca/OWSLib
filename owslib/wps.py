@@ -233,6 +233,13 @@ class WebProcessingService(object):
         Requests a process document from a WPS service and populates the process metadata.
         Returns the process object.
         """
+        method = 'Get'
+        try:
+            base_url = next((m.get('url') for m in self.getOperationByName('DescribeProcess').methods if m.get('type').lower() == method.lower()))
+        except StopIteration:
+            base_url = self.url
+        except KeyError:   # happens in doctests with no caps
+            base_url = self.url
 
         # read capabilities document
         reader = WPSDescribeProcessReader(
@@ -242,7 +249,7 @@ class WebProcessingService(object):
             rootElement = reader.readFromString(xml)
         else:
             # read from server
-            rootElement = reader.readFromUrl(self.url, identifier, verify=self.verify, headers=self.headers)
+            rootElement = reader.readFromUrl(base_url, identifier, verify=self.verify, headers=self.headers)
 
         log.info(element_to_string(rootElement))
 
@@ -260,10 +267,17 @@ class WebProcessingService(object):
         request: optional pre-built XML request document, prevents building of request from other arguments
         response: optional pre-built XML response document, prevents submission of request to live WPS server
         """
+        method = 'Post'
+        try:
+            base_url = next((m.get('url') for m in self.getOperationByName('Execute').methods if m.get('type').lower() == method.lower()))
+        except StopIteration:
+            base_url = self.url
+        except KeyError:   # happens in doctests with no caps
+            base_url = self.url
 
         # instantiate a WPSExecution object
         log.info('Executing WPS request...')
-        execution = WPSExecution(version=self.version, url=self.url,
+        execution = WPSExecution(version=self.version, url=base_url,
                                  username=self.username, password=self.password, verbose=self.verbose,
                                  verify=self.verify, headers=self.headers)
 
@@ -287,6 +301,13 @@ class WebProcessingService(object):
 
         return execution
 
+    def getOperationByName(self, name): 
+        """Return a named content item."""
+        for item in self.operations:
+            if item.name == name:
+                return item
+        raise KeyError("No operation named %s" % name)
+    
     def _parseProcessMetadata(self, rootElement):
         """
         Method to parse a <ProcessDescriptions> XML element and returned the constructed Process object
