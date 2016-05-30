@@ -1311,6 +1311,17 @@ class WPSException:
         else:
             self.text = ""
 
+class Metadata(object):
+    """Initialize an OWS Metadata construct"""
+    def __init__(self, elem, namespace=DEFAULT_OWS_NAMESPACE):
+        if elem is not None:
+            urlattrib=elem.attrib[nspath('href', XLINK_NAMESPACE)]
+            self.url = testXMLValue(urlattrib, True)
+            titleattrib=elem.attrib[nspath('title', XLINK_NAMESPACE)]
+            self.title = testXMLValue(titleattrib, True)
+        else:
+            self.url = None
+            self.title = None
 
 class Process(object):
 
@@ -1336,6 +1347,7 @@ class Process(object):
         self.statusSupported = bool(elem.get("statusSupported"))
         self.storeSupported = bool(elem.get("storeSupported"))
         self.abstract = None
+        self.metadata = []
 
         for child in elem:
 
@@ -1354,6 +1366,10 @@ class Process(object):
             elif child.tag.endswith('Abstract'):
                 self.abstract = testXMLValue(child)
 
+            # <ows:Metadata xlink:title="Documentation" xlink:href="http://emu.readthedocs.org/en/latest/"/>
+            elif child.tag.endswith('Metadata'):
+                self.metadata.append(Metadata(child))
+           
         if self.verbose == True:
             dump(self)
 
