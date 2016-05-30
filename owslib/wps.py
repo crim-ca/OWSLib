@@ -90,7 +90,7 @@ from owslib.etree import etree
 from owslib.ows import DEFAULT_OWS_NAMESPACE, XLINK_NAMESPACE
 from owslib.ows import ServiceIdentification, ServiceProvider, OperationsMetadata, BoundingBox
 from time import sleep
-from owslib.util import (testXMLValue, build_get_url, dump, getTypedValue,
+from owslib.util import (testXMLValue, testXMLAttribute, build_get_url, dump, getTypedValue,
                          getNamespace, element_to_string, nspath, openURL, nspath_eval, log)
 from xml.dom.minidom import parseString
 from owslib.namespaces import Namespaces
@@ -523,7 +523,8 @@ class WPSExecution():
         self.statusLocation = None
         self.dataInputs = []
         self.processOutputs = []
-
+        self.creationTime = None
+        
     def buildRequest(self, identifier, inputs=[], output=[], async=True, lineage=False):
         """
         Method to build a WPS process request.
@@ -835,6 +836,9 @@ class WPSExecution():
         # </ns0:Status>
         statusEl = root.find(nspath('Status/*', ns=wpsns))
         self.status = statusEl.tag.split('}')[1]
+        # creationTime attribute
+        element = root.find(nspath('Status', ns=wpsns))
+        self.creationTime = testXMLAttribute(element, 'creationTime')
         # get progress info
         try:
             percentCompleted = int(statusEl.get('percentCompleted'))
