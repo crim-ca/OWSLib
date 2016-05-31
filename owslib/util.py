@@ -462,16 +462,29 @@ def getNamespace(element):
     else:
         return ""
 
-def build_get_url(base_url, params):
+def build_get_url(base_url, params, overwrite=False):
     ''' Utility function to build a full HTTP GET URL from the service base URL and a dictionary of HTTP parameters. '''
     
-    qs = []
+    qs_base = []
     if base_url.find('?') != -1:
-        qs = cgi.parse_qsl(base_url.split('?')[1])
+        qs_base = cgi.parse_qsl(base_url.split('?')[1])
 
+    qs_params = []
+    for key,value in six.iteritems(params):
+        qs_params.append( (key,value) )
+
+    qs = qs_add = []
+    if overwrite == True:
+        # all params and additional base 
+        qs = qs_params
+        qs_add = qs_base
+    else:
+        # all base and additional params
+        qs = qs_base
+        qs_add = qs_params
     pars = [x[0] for x in qs]
 
-    for key,value in six.iteritems(params):
+    for key,value in qs_add:
         if key not in pars:
             qs.append( (key,value) )
 
