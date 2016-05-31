@@ -233,13 +233,6 @@ class WebProcessingService(object):
         Requests a process document from a WPS service and populates the process metadata.
         Returns the process object.
         """
-        method = 'Get'
-        try:
-            base_url = next((m.get('url') for m in self.getOperationByName('DescribeProcess').methods if m.get('type').lower() == method.lower()))
-        except StopIteration:
-            base_url = self.url
-        except KeyError:   # happens in doctests with no caps
-            base_url = self.url
 
         # read capabilities document
         reader = WPSDescribeProcessReader(
@@ -249,7 +242,7 @@ class WebProcessingService(object):
             rootElement = reader.readFromString(xml)
         else:
             # read from server
-            rootElement = reader.readFromUrl(base_url, identifier, verify=self.verify, headers=self.headers)
+            rootElement = reader.readFromUrl(self.url, identifier, verify=self.verify, headers=self.headers)
 
         log.info(element_to_string(rootElement))
 
@@ -401,7 +394,7 @@ class WPSReader(object):
 
         if method == 'Get':
             # full HTTP request url
-            request_url = build_get_url(url, data)
+            request_url = build_get_url(url, data, overwrite=True)
             log.debug(request_url)
 
             # split URL into base url and query string to use utility function
