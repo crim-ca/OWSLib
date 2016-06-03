@@ -1,0 +1,43 @@
+Python doctest file to simulate a WPS GetCapabilities invocation.
+This test does not execute any live HTTP request, rather it parses XML files containing pre-made HTTP responses.
+
+Imports
+
+    >>> from __future__ import (absolute_import, division, print_function)
+    >>> from tests.utils import resource_file
+    >>> from owslib.wps import WebProcessingService
+
+Initialize WPS client
+
+    >>> wps = WebProcessingService('http://zoo-project.org/cgi-bin/zoo_loader3.cgi', skip_caps=True)
+
+Execute fake invocation of GetCapabilities operation by parsing cached response from 52North service
+
+    >>> xml = open(resource_file('wps_zooCapabilities.xml'), 'rb').read()
+    >>> wps.getcapabilities(xml=xml)
+
+Check WPS description
+
+    >>> wps.identification.type
+    'WPS'
+    >>> wps.identification.title
+    'MapMint Demo Instance'
+
+Check available operations
+    >>> for operation in wps.operations:
+    ...     print(operation.name)
+    ... 
+    GetCapabilities
+    DescribeProcess
+    Execute
+    
+
+Check high level process descriptions
+    >>> len(wps.processes)
+    863
+    >>> process = wps.processes[0]
+    >>> process.identifier, process.title 
+    ('context.saveContext', 'Save a WMC')
+    >>> process = wps.processes[862]
+    >>> process.identifier, process.title
+    ('configuration.display', 'List all key value from a configuration maps.')
