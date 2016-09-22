@@ -499,7 +499,7 @@ def build_get_url(base_url, params, overwrite=False):
 
     pars = [x[0] for x in qs]
 
-    for key, value in six.iteritems(qs_add):
+    for key, value in qs_add:
         if key not in pars:
             qs.append((key, value))
 
