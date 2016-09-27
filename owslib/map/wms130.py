@@ -23,7 +23,9 @@ except ImportError:     # Python 2
 import warnings
 import six
 from owslib.etree import etree
-from owslib.util import openURL, ServiceException, testXMLValue, extract_xml_list, xmltag_split, OrderedDict
+from owslib.util import (openURL, ServiceException, testXMLValue,
+                         extract_xml_list, xmltag_split, OrderedDict, nspath,
+                         bind_url)
 from owslib.util import nspath
 from owslib.fgdc import Metadata
 from owslib.iso import MD_Metadata
@@ -69,6 +71,8 @@ class WebMapService_1_3_0(object):
             self._capabilities = reader.readString(xml)
         else:  # read from server
             self._capabilities = reader.read(self.url, timeout=self.timeout)
+
+        self.request = reader.request
 
         # avoid building capabilities metadata if the
         # response is a ServiceExceptionReport
@@ -148,7 +152,7 @@ class WebMapService_1_3_0(object):
                elevation=None, transparent=False,
                bgcolor=None, exceptions=None, **kwargs):
 
-        request = {'version': self.version, 'request': 'GetMap'}
+        request = {'service': 'WMS', 'version': self.version, 'request': 'GetMap'}
 
         # check layers and styles
         assert len(layers) > 0
@@ -295,6 +299,8 @@ class WebMapService_1_3_0(object):
 
         data = urlencode(request)
 
+        self.request = bind_url(base_url) + data
+
         u = openURL(base_url,
                     data,
                     method,
@@ -371,6 +377,8 @@ class WebMapService_1_3_0(object):
         request['feature_count'] = str(feature_count)
 
         data = urlencode(request)
+ 
+        self.request = bind_url(base_url) + data
 
         u = openURL(base_url, data, method, username=self.username, password=self.password, timeout=timeout or self.timeout)
 
