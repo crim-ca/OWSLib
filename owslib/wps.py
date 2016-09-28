@@ -286,13 +286,13 @@ class WebProcessingService(object):
 
         return execution
 
-    def getOperationByName(self, name): 
+    def getOperationByName(self, name):
         """Return a named content item."""
         for item in self.operations:
             if item.name == name:
                 return item
         raise KeyError("No operation named %s" % name)
-    
+
     def _parseProcessMetadata(self, rootElement):
         """
         Method to parse a <ProcessDescriptions> XML element and returned the constructed Process object
@@ -319,7 +319,7 @@ class WebProcessingService(object):
         # reset metdata
         self.operations = []
         self.processes = []
-        
+
         # use the WPS namespace defined in the document root
         wpsns = getNamespace(root)
 
@@ -521,7 +521,7 @@ class WPSExecution():
         self.dataInputs = []
         self.processOutputs = []
         self.creationTime = None
-        
+
     def buildRequest(self, identifier, inputs=[], output=[], async=True, lineage=False):
         """
         Method to build a WPS process request.
@@ -627,7 +627,7 @@ class WPSExecution():
             outputs = [(output, True)]
         elif isinstance(output, list):
             outputs = outputs
-        
+
         for identifier, as_reference in outputs:
             self._add_output(responseDocumentElement, identifier, asReference=as_reference)
         return root
@@ -1218,7 +1218,7 @@ class Output(InputOutput):
                 if literalDataElement.text is not None and literalDataElement.text.strip() is not '':
                     self.data.append(literalDataElement.text.strip())
             bboxDataElement = dataElement.find(
-                nspath('BoundingBoxData', ns=wpsns))
+                nspath('BoundingBoxData', ns=namespaces['ows']))
             if bboxDataElement is not None:
                 self.dataType = "BoundingBoxData"
                 bbox = BoundingBox(bboxDataElement)
@@ -1364,7 +1364,7 @@ class Process(object):
             # <ows:Metadata xlink:title="Documentation" xlink:href="http://emu.readthedocs.org/en/latest/"/>
             elif child.tag.endswith('Metadata'):
                 self.metadata.append(Metadata(child))
-           
+
         if self.verbose == True:
             dump(self)
 
