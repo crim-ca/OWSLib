@@ -98,6 +98,7 @@ try:                    # Python 3
     from urllib.parse import urlparse
 except ImportError:     # Python 2
     from urlparse import urlparse
+from collections import OrderedDict
 
 # namespace definition
 n = Namespaces()
@@ -399,8 +400,7 @@ class WPSReader(object):
 
             # split URL into base url and query string to use utility function
             spliturl = request_url.split('?')
-            u = openURL(spliturl[0], spliturl[
-                        1], method='Get', username=username, password=password, verify=verify, headers=headers)
+            u = openURL(request_url, method='Get', username=username, password=password, verify=verify, headers=headers)
             return etree.fromstring(u.read())
 
         elif method == 'Post':
@@ -439,9 +439,12 @@ class WPSCapabilitiesReader(WPSReader):
         url: WPS service base url, to which is appended the HTTP parameters: service, version, and request.
         username, password: optional user credentials
         """
+        data = OrderedDict()
+        data['Service'] = 'WPS'
+        data['Request'] = 'GetCapabilities'
+        data['Version'] = self.version
         return self._readFromUrl(url,
-                                 {'service': 'WPS', 'request':
-                                     'GetCapabilities', 'version': self.version},
+                                 data,
                                  username=username, password=password, verify=verify, headers=headers)
 
 
