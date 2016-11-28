@@ -439,6 +439,7 @@ class WPSCapabilitiesReader(WPSReader):
         url: WPS service base url, to which is appended the HTTP parameters: service, version, and request.
         username, password: optional user credentials
         """
+        # TODO: cows patch
         data = OrderedDict()
         data['Service'] = 'WPS'
         data['Request'] = 'GetCapabilities'
@@ -464,10 +465,14 @@ class WPSDescribeProcessReader(WPSReader):
         Reads a WPS DescribeProcess document from a remote service and returns the XML etree object
         url: WPS service base url, to which is appended the HTTP parameters: 'service', 'version', and 'request', and 'identifier'.
         """
-
+        # TODO: cows patch
+        data = OrderedDict()
+        data['Service'] = 'WPS'
+        data['Request'] = 'DescribeProcess'
+        data['Version'] = self.version
+        data['Identifier'] = identifier
         return self._readFromUrl(url,
-                                 {'service': 'WPS', 'request': 'DescribeProcess',
-                                     'version': self.version, 'identifier': identifier},
+                                 data,
                                  username=username, password=password, verify=verify, headers=headers)
 
 
