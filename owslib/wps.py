@@ -1454,6 +1454,11 @@ class BoundingBoxDataInput(object):
     """
     def __init__(self, data, crs=None, dimensions=2):
         self.data = data
+        if isinstance(data, list):
+            self.data = data
+        else:
+            # convenience method for string input
+            self.data = [float(number) for number in data.split(',')]
         self.dimensions = dimensions
         self.crs = crs or 'epsg:4326'
 
