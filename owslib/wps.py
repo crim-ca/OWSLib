@@ -105,7 +105,7 @@ from owslib.etree import etree
 from owslib.ows import DEFAULT_OWS_NAMESPACE, XLINK_NAMESPACE
 from owslib.ows import ServiceIdentification, ServiceProvider, OperationsMetadata, BoundingBox
 from time import sleep
-from owslib.util import (testXMLValue, testXMLAttribute, build_get_url, dump, getTypedValue,
+from owslib.util import (testXMLValue, testXMLAttribute, build_get_url, clean_ows_url, dump, getTypedValue,
                          getNamespace, element_to_string, nspath, openURL, nspath_eval, log)
 from xml.dom.minidom import parseString
 from owslib.namespaces import Namespaces
@@ -211,7 +211,7 @@ class WebProcessingService(object):
         """
 
         # fields passed in from object initializer
-        self.url = url
+        self.url = clean_ows_url(url)
         self.username = username
         self.password = password
         self.version = version
