@@ -1491,6 +1491,55 @@ class BoundingBoxDataInput(object):
         return data_el
 
 
+class BoundingBoxDataInput(object):
+    """
+    Data input class for ``wps:BoundingBoxData``.
+
+    :param list data: Coordinates of lower and upper corner. Example [10, 50, 20, 60]
+    with lower corner=[10, 50] and upper corner=[20, 60].
+    :param string crs: Name of coordinate reference system. Default: "epsg:4326".
+    """
+    def __init__(self, data, crs=None, dimensions=2):
+        if isinstance(data, list):
+            self.data = data
+        else:
+            # convenience method for string input
+            self.data = [float(number) for number in data.split(',')]
+        self.lower_corner = (data[0], data[1])
+        self.upper_corner = (data[2], data[3])
+        self.dimensions = dimensions
+        self.crs = crs or 'epsg:4326'
+
+    def get_xml(self):
+        """
+        Method that returns the object data as an XML snippet,
+        to be inserted into the WPS request document sent to the server.
+        """
+        '''
+        <wps:Data>
+            <wps:BoundingBoxData crs="EPSG:4326" dimenstions="2">
+                <ows:LowerCorner>51.9 7.0</ows:LowerCorner>
+                <ows:UpperCorner>53.0 8.0</ows:UpperCorner>
+            </wps:BoundingBoxData>
+        </wps:Data>
+        '''
+        data_el = etree.Element(nspath_eval('wps:Data', namespaces))
+        attrib = dict()
+        if self.crs:
+            attrib['crs'] = self.crs
+        if self.dimensions:
+            attrib['dimensions'] = str(self.dimensions)
+        bbox_el = etree.SubElement(
+            data_el, nspath_eval('wps:BoundingBoxData', namespaces), attrib=attrib)
+        lc_el = etree.SubElement(
+            bbox_el, nspath_eval('ows:LowerCorner', namespaces))
+        lc_el.text = "{0[0]} {0[1]}".format(self.lower_corner)
+        uc_el = etree.SubElement(
+            bbox_el, nspath_eval('ows:UpperCorner', namespaces))
+        uc_el.text = "{0[0]} {0[1]}".format(self.upper_corner)
+        return data_el
+
+
 class ComplexDataInput(IComplexDataInput, ComplexData):
 
     def __init__(self, value, mimeType=None, encoding=None, schema=None):
