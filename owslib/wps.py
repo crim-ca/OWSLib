@@ -1351,16 +1351,21 @@ class BoundingBoxDataInput(object):
     :param string crs: Name of coordinate reference system. Default: "epsg:4326".
     """
     def __init__(self, data, crs=None, dimensions=2):
-        self.data = data
         if isinstance(data, list):
             self.data = data
         else:
             # convenience method for string input
             self.data = [float(number) for number in data.split(',')]
+        self.lower_corner = (data[0], data[1])
+        self.upper_corner = (data[2], data[3])
         self.dimensions = dimensions
         self.crs = crs or 'epsg:4326'
 
     def get_xml(self):
+        """
+        Method that returns the object data as an XML snippet,
+        to be inserted into the WPS request document sent to the server.
+        """
         '''
         <wps:Data>
             <wps:BoundingBoxData crs="EPSG:4326" dimenstions="2">
@@ -1379,10 +1384,10 @@ class BoundingBoxDataInput(object):
             data_el, nspath_eval('wps:BoundingBoxData', namespaces), attrib=attrib)
         lc_el = etree.SubElement(
             bbox_el, nspath_eval('ows:LowerCorner', namespaces))
-        lc_el.text = "{0[0]} {0[1]}".format(self.data)
+        lc_el.text = "{0[0]} {0[1]}".format(self.lower_corner)
         uc_el = etree.SubElement(
             bbox_el, nspath_eval('ows:UpperCorner', namespaces))
-        uc_el.text = "{0[2]} {0[3]}".format(self.data)
+        uc_el.text = "{0[0]} {0[1]}".format(self.upper_corner)
         return data_el
 
 
