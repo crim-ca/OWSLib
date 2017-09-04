@@ -1198,6 +1198,10 @@ class Output(InputOutput):
                     self.data.append(literalDataElement.text.strip())
             bboxDataElement = dataElement.find(
                 nspath('BoundingBox', ns=namespaces['ows']))
+            bboxDataElement = dataElement.find(nspath('BoundingBox', ns=namespaces['ows']))
+            if not bboxDataElement:
+                # TODO: just a workaround for data-inputs in lineage
+                bboxDataElement = dataElement.find(nspath('BoundingBoxData', ns=namespaces['wps']))
             if bboxDataElement is not None:
                 self.dataType = "BoundingBoxData"
                 bbox = BoundingBox(bboxDataElement)
