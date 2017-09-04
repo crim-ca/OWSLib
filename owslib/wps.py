@@ -162,7 +162,6 @@ def is_complexdata(val):
     """
     Checks if the provided value is an implementation of ``IComplexDataInput``.
     """
-    # return hasattr(val, 'getXml')
     return isinstance(val, IComplexDataInput)
 
 
@@ -1196,8 +1195,6 @@ class Output(InputOutput):
                 self.dataType = literalDataElement.get('dataType')
                 if literalDataElement.text is not None and literalDataElement.text.strip() is not '':
                     self.data.append(literalDataElement.text.strip())
-            bboxDataElement = dataElement.find(
-                nspath('BoundingBox', ns=namespaces['ows']))
             bboxDataElement = dataElement.find(nspath('BoundingBox', ns=namespaces['ows']))
             if not bboxDataElement:
                 # TODO: just a workaround for data-inputs in lineage
