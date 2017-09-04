@@ -151,11 +151,19 @@ def is_literaldata(val):
     return is_str
 
 
+def is_boundingboxdata(val):
+    """
+    Checks if the provided value is an implementation of ``BoundingBoxDataInput``.
+    """
+    return isinstance(val, BoundingBoxDataInput)
+
+
 def is_complexdata(val):
     """
-    Checks if the provided value is an implementation of IComplexData.
+    Checks if the provided value is an implementation of ``IComplexDataInput``.
     """
-    return hasattr(val, 'getXml')
+    # return hasattr(val, 'getXml')
+    return isinstance(val, IComplexDataInput)
 
 
 class IComplexDataInput(object):
@@ -584,6 +592,8 @@ class WPSExecution():
             elif is_complexdata(val):
                 log.debug("complexdata %s", key)
                 inputElement.append(val.getXml())
+            elif is_boundingboxdata(val):
+                inputElement.append(val.get_xml())
             else:
                 raise Exception(
                     'input type of "%s" parameter is unknown' % key)
@@ -1123,7 +1133,7 @@ class Output(InputOutput):
         # <ComplexData> or <ComplexOutput>
         self._parseComplexData(outputElement, 'ComplexOutput')
 
-        # <BoundingBoxData>
+        # <BoundingBoxOutput>
         self._parseBoundingBoxData(outputElement, 'BoundingBoxOutput')
 
         # <Data>
@@ -1163,10 +1173,10 @@ class Output(InputOutput):
         # OWS BoundingBox:
         #
         # <wps:Data>
-        #   <wps:BoundingBoxData crs="EPSG:4326" dimensions="2">
+        #   <ows:BoundingBox crs="EPSG:4326" dimensions="2">
         #     <ows:LowerCorner>0.0 -90.0</ows:LowerCorner>
         #     <ows:UpperCorner>180.0 90.0</ows:UpperCorner>
-        #   </wps:BoundingBoxData>
+        #   </ows:BoundingBox>
         # </wps:Data>
         #
         dataElement = outputElement.find(nspath('Data', ns=wpsns))
@@ -1187,18 +1197,12 @@ class Output(InputOutput):
                 if literalDataElement.text is not None and literalDataElement.text.strip() is not '':
                     self.data.append(literalDataElement.text.strip())
             bboxDataElement = dataElement.find(
-                nspath('BoundingBoxData', ns=namespaces['ows']))
+                nspath('BoundingBox', ns=namespaces['ows']))
             if bboxDataElement is not None:
                 self.dataType = "BoundingBoxData"
                 bbox = BoundingBox(bboxDataElement)
-                if bbox is not None and bbox.minx is not None:
-                    bbox_value = None
-                    if bbox.crs is not None and bbox.crs.axisorder == 'yx':
-                        bbox_value = "{0},{1},{2},{3}".format(bbox.miny, bbox.minx, bbox.maxy, bbox.maxx)
-                    else:
-                        bbox_value = "{0},{1},{2},{3}".format(bbox.minx, bbox.miny, bbox.maxx, bbox.maxy)
-                    log.debug("bbox=%s", bbox_value)
-                    self.data.append(bbox_value)
+                if bbox:
+                    self.data.append(bbox)
 
     def retrieveData(self, username=None, password=None):
         """
