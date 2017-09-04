@@ -12,7 +12,7 @@ Imports
 Process input/output arguments
 
     >>> processid = "bbox"
-    >>> bbox = BoundingBoxDataInput([10, 50, 20, 60])
+    >>> bbox = BoundingBoxDataInput([51.9, 7.0, 53.0, 8.0])
     >>> inputs = [ ("bbox", bbox)]
 
 Build XML request for WPS process execution
