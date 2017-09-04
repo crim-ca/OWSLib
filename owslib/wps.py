@@ -1187,7 +1187,7 @@ class Output(InputOutput):
                 if literalDataElement.text is not None and literalDataElement.text.strip() is not '':
                     self.data.append(literalDataElement.text.strip())
             bboxDataElement = dataElement.find(
-                nspath('BoundingBoxData', ns=wpsns))
+                nspath('BoundingBoxData', ns=namespaces['ows']))
             if bboxDataElement is not None:
                 self.dataType = "BoundingBoxData"
                 bbox = BoundingBox(bboxDataElement)
